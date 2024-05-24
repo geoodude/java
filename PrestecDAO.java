@@ -48,7 +48,34 @@ public class PrestecDAO {
             e.printStackTrace();
         }
     }
-
+    public Prestec obtenirPrestecPerId(int idPrestec) {
+        String sql = "SELECT * FROM prestecs WHERE ID_Préstec = ?";
+        Prestec prestec = null;
+    
+        try (Connection conn = Conexio_Basedades.getConexio();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+    
+            stmt.setInt(1, idPrestec);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    prestec = new Prestec(
+                            rs.getInt("ID_Llibre"),
+                            rs.getInt("ID_Usuari"),
+                            rs.getDate("Data_Préstec"),
+                            rs.getDate("Data_Retorn_Prevista"),
+                            rs.getDate("Data_Retorn_Real"),
+                            rs.getString("Estat")
+                    );
+                    prestec.setID_Prestec(rs.getInt("ID_Préstec"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return prestec;
+    }
+    
     public void eliminarPrestec(int idPrestec) {
         String sql = "DELETE FROM prestecs WHERE ID_Préstec = ?";
 
@@ -62,4 +89,3 @@ public class PrestecDAO {
         }
     }
 }
-
