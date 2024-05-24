@@ -10,7 +10,7 @@ public class MainFramePrestecs extends JFrame {
     private PrestecDAO prestecDAO;
 
     private JTextField txtID, txtIDLlibre, txtIDUsuari, txtDataPrestec, txtDataRetornPrevista, txtDataRetornReal, txtEstat;
-    private JButton btnInsertar, btnActualitzar, btnEliminar;
+    private JButton btnPrestec, btnDevolucio;
 
     public MainFramePrestecs() {
         prestecDAO = new PrestecDAO();
@@ -53,43 +53,34 @@ public class MainFramePrestecs extends JFrame {
         txtEstat = new JTextField();
         panel.add(txtEstat);
 
-        btnInsertar = new JButton("Insertar");
-        btnInsertar.addActionListener(new ActionListener() {
+        btnPrestec = new JButton("Prestec");
+        btnPrestec.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                inserirPrestec();
+                prestar();
             }
         });
-        panel.add(btnInsertar);
+        panel.add(btnPrestec);
 
-        btnActualitzar = new JButton("Actualitzar");
-        btnActualitzar.addActionListener(new ActionListener() {
+        btnDevolucio = new JButton("Devolucio");
+        btnDevolucio.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actualitzarPrestec();
+                retornar();
             }
         });
-        panel.add(btnActualitzar);
-
-        btnEliminar = new JButton("Eliminar");
-        btnEliminar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                eliminarPrestec();
-            }
-        });
-        panel.add(btnEliminar);
+        panel.add(btnDevolucio);
 
         add(panel);
     }
 
-    private void inserirPrestec() {
+    private void prestar() {
         int idLlibre = Integer.parseInt(txtIDLlibre.getText());
         int idUsuari = Integer.parseInt(txtIDUsuari.getText());
         Date dataPrestec = parseDate(txtDataPrestec.getText());
         Date dataRetornPrevista = parseDate(txtDataRetornPrevista.getText());
-        Date dataRetornReal = parseDate(txtDataRetornReal.getText());
-        String estat = txtEstat.getText();
+        Date dataRetornReal = null; 
+        String estat = "actiu"; 
 
         Prestec prestec = new Prestec(idLlibre, idUsuari, dataPrestec, dataRetornPrevista, dataRetornReal, estat);
         prestecDAO.afegirPrestec(prestec);
@@ -97,26 +88,17 @@ public class MainFramePrestecs extends JFrame {
         netejarCamps();
     }
 
-    private void actualitzarPrestec() {
-        int id = Integer.parseInt(txtID.getText());
-        int idLlibre = Integer.parseInt(txtIDLlibre.getText());
-        int idUsuari = Integer.parseInt(txtIDUsuari.getText());
-        Date dataPrestec = parseDate(txtDataPrestec.getText());
-        Date dataRetornPrevista = parseDate(txtDataRetornPrevista.getText());
-        Date dataRetornReal = parseDate(txtDataRetornReal.getText());
-        String estat = txtEstat.getText();
-
-        Prestec prestec = new Prestec(idLlibre, idUsuari, dataPrestec, dataRetornPrevista, dataRetornReal, estat);
-        prestec.setID_Prestec(id);
-        prestecDAO.modificarPrestec(prestec);
-        JOptionPane.showMessageDialog(this, "Préstec actualitzat correctament.");
-        netejarCamps();
-    }
-
-    private void eliminarPrestec() {
-        int id = Integer.parseInt(txtID.getText());
-        prestecDAO.eliminarPrestec(id);
-        JOptionPane.showMessageDialog(this, "Préstec eliminat correctament.");
+    private void retornar() {
+        int idPrestec = Integer.parseInt(txtID.getText());
+        Prestec prestec = prestecDAO.obtenirPrestecPerId(idPrestec);
+        if (prestec != null) {
+            prestec.setData_Retorn_Real(new Date()); // Set the return date to current date
+            prestec.setEstat("completat"); // Update status to completed
+            prestecDAO.modificarPrestec(prestec);
+            JOptionPane.showMessageDialog(this, "Préstec retornat correctament.");
+        } else {
+            JOptionPane.showMessageDialog(this, "No s'ha trobat cap préstec amb aquest ID.");
+        }
         netejarCamps();
     }
 
@@ -149,4 +131,3 @@ public class MainFramePrestecs extends JFrame {
         });
     }
 }
-
